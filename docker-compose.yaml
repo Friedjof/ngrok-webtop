@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    volumes:
+      - ./data/proxy/data:/data
+      - ./data/proxy/letsencrypt:/etc/letsencrypt
+    networks:
+      - proxy
+
+  ngrok:
+    image: 'ngrok/ngrok:latest'
+    restart: unless-stopped
+    depends_on:
+      - db
+      - web
+    command:
+      - "http"
+      - "proxy:80"
+      - "--config"
+      - "/etc/ngrok.yml"
+    volumes:
+      - ./data/ngrok/ngrok.yml:/etc/ngrok.yml
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    driver: "bridge"
